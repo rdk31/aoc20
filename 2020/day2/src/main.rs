@@ -9,9 +9,9 @@ fn main() -> io::Result<()> {
     let mut part2 = 0;
 
     for line in reader.lines() {
-        let b = line.unwrap();
+        let unwrapped_line = line.unwrap();
 
-        let first_split: Vec<&str> = b.split(":").collect();
+        let first_split: Vec<&str> = unwrapped_line.split(":").collect();
         let password = &first_split[1][1..];
         let second_split: Vec<&str> = first_split[0].split(" ").collect();
         let character = second_split[1].chars().nth(0).unwrap();
