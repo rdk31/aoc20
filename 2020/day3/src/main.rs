@@ -17,7 +17,7 @@ fn get_scopes(map: &Vec<Vec<char>>, x_offset: usize, y_offset: usize) -> i64 {
         y += y_offset;
     }
 
-    return trees;
+    trees
 }
 
 fn main() -> io::Result<()> {
