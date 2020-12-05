@@ -7,10 +7,7 @@ fn main() -> io::Result<()> {
 
     let mut highest_seat_id = 0;
 
-    let mut seats = Vec::with_capacity(901);
-    for i in 0..901 {
-        seats.push(i);
-    }
+    let mut seats_occupied = [false; 902];
 
     for line in reader.lines() {
         let unwrapped_line = line.unwrap();
@@ -36,10 +33,7 @@ fn main() -> io::Result<()> {
 
         let seat_id = row_id * 8 + column_id;
 
-        let index = seats.iter().position(|&x| x == seat_id);
-        if index.is_some() {
-            seats.remove(index.unwrap());
-        }
+        seats_occupied[seat_id as usize] = true;
         if seat_id > highest_seat_id {
             highest_seat_id = seat_id;
         }
@@ -51,7 +45,12 @@ fn main() -> io::Result<()> {
     }
 
     println!("highest seat id: {}", highest_seat_id);
-    println!("left seats: {:?}", seats);
+    print!("seats left: ");
+    seats_occupied
+        .iter()
+        .enumerate()
+        .filter(|&(_, x)| *x == false)
+        .for_each(|(i, _)| print!("{} ", i));
 
     Ok(())
 }
