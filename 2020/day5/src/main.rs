@@ -44,10 +44,10 @@ fn main() -> io::Result<()> {
             highest_seat_id = seat_id;
         }
 
-        println!(
-            "{}:{} {}:{} # {}",
-            row_str, row_id, column_str, column_id, seat_id
-        );
+        // println!(
+        //     "{}:{} {}:{} # {}",
+        //     row_str, row_id, column_str, column_id, seat_id
+        // );
     }
 
     println!("highest seat id: {}", highest_seat_id);
