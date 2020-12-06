@@ -15,21 +15,15 @@ fn main() -> io::Result<()> {
         let row_str = &unwrapped_line[..7];
         let column_str = &unwrapped_line[7..];
 
-        let row_id = row_str.char_indices().fold(0, |acc, (i, c)| {
-            if c == 'B' {
-                acc + i32::pow(2, (6usize - i) as u32)
-            } else {
-                acc
-            }
-        });
+        let row_id = row_str
+            .char_indices()
+            .filter(|(_, c)| *c == 'B')
+            .fold(0, |acc, (i, _)| acc + (i32::pow(2, (6usize - i) as u32)));
 
-        let column_id = column_str.char_indices().fold(0, |acc, (i, c)| {
-            if c == 'R' {
-                acc + i32::pow(2, (2usize - i) as u32)
-            } else {
-                acc
-            }
-        });
+        let column_id = column_str
+            .char_indices()
+            .filter(|(_, c)| *c == 'R')
+            .fold(0, |acc, (i, _)| acc + (i32::pow(2, (2usize - i) as u32)));
 
         let seat_id = row_id * 8 + column_id;
 
