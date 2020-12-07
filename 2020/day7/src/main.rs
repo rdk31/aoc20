@@ -6,8 +6,6 @@ use nom::{
     character::complete::{alphanumeric1, digit1, space1},
     combinator::map,
     multi::separated_list1,
-    number::complete::be_i32,
-    sequence::tuple,
     IResult,
 };
 use std::collections::HashMap;
