@@ -50,10 +50,7 @@ fn parse_bag(input: &str) -> IResult<&str, String> {
     let (input, _) = space1(input)?;
     let (input, _) = alt((tag("bags"), tag("bag")))(input)?;
 
-    Ok((
-        input,
-        format!("{} {}", characteristics, color.to_owned()).to_owned(),
-    ))
+    Ok((input, format!("{} {}", characteristics, color).to_owned()))
 }
 
 fn parse_elem(input: &str) -> IResult<&str, Bag> {
