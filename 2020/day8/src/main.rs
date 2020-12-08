@@ -122,7 +122,7 @@ fn main() -> io::Result<()> {
     let mut emulator = Emulator::new(code.clone());
 
     let part1 = emulator.part1();
-    println!("{}", part1);
+    println!("part1: {}", part1);
 
     let mut part2_res = emulator.part2();
 
@@ -163,7 +163,7 @@ fn main() -> io::Result<()> {
         part2_res = emulator.part2();
     }
 
-    println!("{}", part2_res.unwrap());
+    println!("part2: {}", part2_res.unwrap());
 
     Ok(())
 }
