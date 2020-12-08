@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
 
@@ -13,69 +12,87 @@ enum OpType {
 struct Op {
     op_type: OpType,
     arg: i32,
-    run: bool,
 }
 
-fn part1(program: &mut Vec<Op>) {
-    let mut ip = 0;
-    let mut op = program.get_mut(ip as usize).unwrap();
-    let mut acc = 0;
+struct Registers {
+    acc: i32,
+    ip: usize,
+}
 
-    while !op.run {
-        match op.op_type {
-            OpType::Nop => ip += 1,
-            OpType::Acc => {
-                acc += op.arg;
-                ip += 1
-            }
-            OpType::Jmp => ip += op.arg,
+struct Emulator {
+    registers: Registers,
+    code: Vec<(Op, bool)>,
+}
+
+impl Emulator {
+    fn new(code: Vec<(Op, bool)>) -> Self {
+        Emulator {
+            registers: Registers { acc: 0, ip: 0 },
+            code: code,
         }
-
-        // println!("op: {:?} ip: {} acc: {}", op, ip, acc);
-
-        op.run = true;
-        op = program.get_mut(ip as usize).unwrap();
     }
 
-    println!("part1: {}", acc);
-}
+    fn reset(&mut self) {
+        self.registers.acc = 0;
+        self.registers.ip = 0;
 
-fn part2(program: &mut Vec<Op>) -> Option<i32> {
-    let mut ip = 0;
-    let mut op = program.get_mut(ip as usize).unwrap();
-    let mut acc = 0;
+        self.code.iter_mut().for_each(|(_, run)| *run = false);
+    }
 
-    loop {
-        match op.op_type {
-            OpType::Nop => ip += 1,
-            OpType::Acc => {
-                acc += op.arg;
-                ip += 1
-            }
-            OpType::Jmp => ip += op.arg,
-        }
-
-        // println!("op: {:?} ip: {} acc: {}", op, ip, acc);
-
-        op.run = true;
-        op = match program.get_mut(ip as usize) {
-            Some(o) => o,
-            None => break,
+    fn step(&mut self) -> Option<bool> {
+        let (op, run) = match self.code.get_mut(self.registers.ip) {
+            Some(x) => x,
+            None => return None,
         };
 
-        if op.run {
-            return None;
+        if *run {
+            return Some(true);
         }
+
+        match op.op_type {
+            OpType::Nop => self.registers.ip += 1,
+            OpType::Jmp => self.registers.ip = ((self.registers.ip as i32) + op.arg) as usize,
+            OpType::Acc => {
+                self.registers.acc += op.arg;
+                self.registers.ip += 1;
+            }
+        }
+
+        *run = true;
+
+        Some(false)
     }
 
-    Some(acc)
+    fn part1(&mut self) -> i32 {
+        self.reset();
+
+        let mut op_run_before = self.step().unwrap();
+
+        while !op_run_before {
+            op_run_before = self.step().unwrap();
+        }
+
+        return self.registers.acc;
+    }
+
+    fn part2(&mut self) -> Option<i32> {
+        self.reset();
+
+        loop {
+            match self.step() {
+                Some(true) => return None,
+                Some(false) => (),
+                None => return Some(self.registers.acc),
+            }
+        }
+    }
 }
 
 fn main() -> io::Result<()> {
     let file = File::open("input.txt")?;
     let reader = BufReader::new(file);
 
-    let mut program: Vec<Op> = Vec::new();
+    let mut code: Vec<(Op, bool)> = Vec::new();
 
     for line in reader.lines() {
         let unwrapped_line = line.unwrap();
@@ -87,69 +104,66 @@ fn main() -> io::Result<()> {
             "nop" => Op {
                 op_type: OpType::Nop,
                 arg: 0,
-                run: false,
             },
             "jmp" => Op {
                 op_type: OpType::Jmp,
                 arg: arg,
-                run: false,
             },
             "acc" => Op {
                 op_type: OpType::Acc,
                 arg: arg,
-                run: false,
             },
             _ => panic!(),
         };
 
-        program.push(op);
+        code.push((op, false));
     }
 
-    // println!("{:?}", program);
-    part1(&mut program);
+    let mut emulator = Emulator::new(code.clone());
 
-    for op in program.iter_mut() {
-        op.run = false;
-    }
+    let part1 = emulator.part1();
+    println!("{}", part1);
 
-    let mut part2_res = part2(&mut program.clone());
+    let mut part2_res = emulator.part2();
 
     let mut pos = 0;
     let mut jmp = true;
 
     while part2_res.is_none() {
-        let mut cloned = program.clone();
+        let mut cloned = code.clone();
 
         if jmp {
             pos += cloned
                 .iter()
                 .skip(pos)
-                .position(|op| op.op_type == OpType::Jmp)
+                .position(|(op, _)| op.op_type == OpType::Jmp)
                 .unwrap();
         } else {
             pos += cloned
                 .iter()
                 .skip(pos)
-                .position(|op| op.op_type == OpType::Nop)
+                .position(|(op, _)| op.op_type == OpType::Nop)
                 .unwrap();
         }
 
         if jmp {
-            cloned[pos].op_type = OpType::Nop;
+            cloned[pos].0.op_type = OpType::Nop;
         } else {
-            cloned[pos].op_type = OpType::Jmp;
+            cloned[pos].0.op_type = OpType::Jmp;
         }
 
         pos += 1;
 
-        if pos >= program.len() {
+        if pos >= code.len() {
             pos = 0;
             jmp = false;
         }
-        part2_res = part2(&mut cloned);
+
+        emulator = Emulator::new(cloned);
+        part2_res = emulator.part2();
     }
 
-    println!("part2: {}", part2_res.unwrap());
+    println!("{}", part2_res.unwrap());
 
     Ok(())
 }
