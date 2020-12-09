@@ -40,7 +40,7 @@ fn find_set(nums: &Vec<u64>, invalid: u64) -> Option<Vec<u64>> {
         for pos in 0..(nums.len() - len) {
             let set: Vec<u64> = nums.iter().skip(pos).take(len).map(|n| *n).collect();
 
-            if set.iter().fold(0, |acc, n| acc + n) == invalid {
+            if set.iter().sum::<u64>() == invalid {
                 return Some(set);
             }
         }
