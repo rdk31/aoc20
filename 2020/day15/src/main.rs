@@ -71,7 +71,6 @@ mod tests {
     fn example6() {
         assert_eq!(get_nth_number_spoken(&vec![3, 1, 2], 2020), 1836);
     }
-
     #[test]
     fn example7() {
         assert_eq!(get_nth_number_spoken(&vec![0, 3, 6], 30000000), 175594);
